@@ -1,4 +1,4 @@
-IMAGE=nedi:test
+IMAGE=nedi:latest
 
 CONFIG_HOST=$HOME/.config/nedi
 CONFIG_CONTAINER=/root/.config/nvim/lua
