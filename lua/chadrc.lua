@@ -1,4 +1,6 @@
-require "custom.nedi.nedirc"
+-- require "custom.nedi.nedirc"
+local M = {}
+return M
 --
 -- local M = {}
 --
