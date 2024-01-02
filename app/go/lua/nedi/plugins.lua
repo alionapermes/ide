@@ -1,4 +1,4 @@
-local overrides = require "custom.configs.overrides"
+local overrides = require "custom.nedi.configs.overrides"
 
 ---@type NvPluginSpec[]
 local plugins = {
@@ -9,7 +9,7 @@ local plugins = {
     "neovim/nvim-lspconfig",
     config = function()
       require "plugins.configs.lspconfig"
-      require "custom.configs.lspconfig"
+      require "custom.nedi.configs.lspconfig"
     end, -- Override to setup mason-lspconfig
   },
 
@@ -30,7 +30,7 @@ local plugins = {
     "RRethy/vim-illuminate",
     event = "BufReadPost",
     config = function()
-      require "custom.configs.illuminate"
+      require "custom.nedi.configs.illuminate"
     end,
   },
 }
