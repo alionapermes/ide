@@ -1,50 +1,95 @@
 #! /bin/sh
 
-TARGET_BIN=/bin/nedi
+declare app=""
+declare force=false
 
-force=false
-app=""
+function usage() {
+  echo "Usage: install.sh [<options>]"
+  echo ""
+  echo "Options:"
+  echo "    -h, --help     Print this help message"
+  echo "    -f, --force    Install with removing old data"
+  echo "    -a, --app      Choose an app to install"
+}
 
-while getopts hfa: flag; do
-  case $flag in
-    h)
-      echo "HELP"
-      exit 0
-      ;;
-    f) force=true;;
-    a)
-      echo "app to install: nedi $OPTARG"
-      app=$OPTARG
-      ;;
-  esac
-done
+function parse_args() {
+  while getopts hfa: param; do
+    case $param in
+      h | help)
+        usage
+        exit 0
+        ;;
+      f | force)
+        force=true
+        ;;
+      a | app)
+        app=$OPTARG
+        echo "app to install: lunedi $app"
+        ;;
+    esac
+  done
+}
 
-if [[ ! -d ./app/$app ]]; then
-  echo "app $app not found"
-  exit 1
-fi
+function install_app() {
+  docker buildx build ./app/$APP --tag=$IMAGE_TAG --network=host
 
-source ./app/$app/install.cfg
+  if [[ ! -d $DATA_HOST ]]; then
+    mkdir -p $DATA_HOST
+  fi
 
-if $force ; then
-  echo "cleaning installation dirs…"
-  sudo rm -rf $CONFIG_HOST
-  sudo rm -rf $DATA_CORE_HOST
-  sudo rm -rf $DATA_LAZY_HOST
-fi
+  if [[ ! -d $CACHE_HOST ]]; then
+    mkdir -p $CACHE_HOST
+  fi
 
-docker buildx build ./app/$app --tag=$IMAGE
+  if [[ ! -d $CONFIG_HOST ]]; then
+    mkdir -p $CONFIG_HOST
+  fi
 
-mkdir -p $CONFIG_HOST
+  id=$(docker create -q $IMAGE_TAG)
+  docker cp $id:$APP_DATA_CONTAINER $APP_DATA_HOST
+  docker cp $id:$APP_CACHE_CONTAINER $APP_CACHE_HOST
+  docker cp $id:$APP_CONFIG_CONTAINER $APP_CONFIG_HOST
+  docker rm -v $id
 
-id=$(docker create -q $IMAGE)
-docker cp $id:$LUA_CONFIG_CONTAINER $LUA_CONFIG_HOST
-docker rm -v $id
+  profile=$APP_CONFIG_HOST/.profile
+  target_bin=$HOME/.local/bin/$APP
 
-cp ./app/$app/install.cfg $CONFIG_HOST/launch.cfg
+  echo "# .commonrc" >> $profile
+  cat ./.commonrc >> $profile
 
-mkdir -p $DATA_CORE_HOST
-mkdir -p $DATA_LAZY_HOST
+  echo "" >> $profile
+  echo "# .apprc" >> $profile
+  cat ./app/$APP/.apprc >> $profile
 
-sudo ln -sf $(pwd)/launch.sh $TARGET_BIN
-sudo chmod ugo+x $TARGET_BIN
+  ln -sf $(pwd)/launch.sh $target_bin
+  chmod ugo+x $target_bin
+}
+
+function main() {
+  parse_args "$@"
+
+  if [[ ! -d ./app/$app ]]; then
+    echo "app $app not found"
+    exit 1
+  fi
+
+  source ./.commonrc
+  source ./app/$app/.apprc
+
+  if [[ $app != $APP ]]; then
+    echo "unexpected app:APP: $app:$APP"
+    exit 1
+  fi
+
+  if $force; then
+    echo "cleaning installation dirs…"
+    sudo rm -rf $APP_DATA_HOST
+    sudo rm -rf $APP_CACHE_HOST
+    sudo rm -rf $APP_CONFIG_HOST
+  fi
+
+  install_app
+  echo "done"
+}
+
+main "$@"

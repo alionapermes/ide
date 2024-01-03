@@ -1,0 +1,5 @@
+TARGET=lunedi
+
+DATA_HOST=$HOME/.local/share/$TARGET
+CACHE_HOST=$HOME/.cache/$TARGET
+CONFIG_HOST=$HOME/.config/$TARGET
