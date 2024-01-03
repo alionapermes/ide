@@ -7,6 +7,21 @@ local plugins = {
 
   {
     "neovim/nvim-lspconfig",
+
+    dependencies = {
+      "nvimtools/none-ls.nvim",
+
+      lazy = false,
+      event = "VimEnter",
+
+      config = function()
+        require "custom.nedi.configs.none-ls"
+      end,
+    },
+
+    lazy = false,
+    event = "VimEnter",
+
     config = function()
       require "plugins.configs.lspconfig"
       require "custom.nedi.configs.lspconfig"
@@ -16,7 +31,6 @@ local plugins = {
   {
     "nvim-tree/nvim-tree.lua",
     opts = overrides.nvimtree,
-    -- require 'kyazdani42/nvim-web-devicons',
   },
 
   {

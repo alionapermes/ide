@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM golang:alpine
 
 RUN apk add bash
 
@@ -15,13 +15,13 @@ RUN mkdir -p /root/.local/share/nvim/lazy
 RUN mkdir -p /root/workspace
 
 # go
-RUN apk add go
+# RUN apk add go
 RUN go install golang.org/x/tools/gopls@latest
 RUN go install github.com/nametake/golangci-lint-langserver@latest
 RUN go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+RUN go install golang.org/x/tools/cmd/goimports@latest
+RUN go install github.com/segmentio/golines@latest
 # RUN go install github.com/bufbuild/buf-language-server/cmd/bufls@latest
-
-ENV PATH "$PATH:/root/go/bin"
 
 RUN apk add npm yarn
 

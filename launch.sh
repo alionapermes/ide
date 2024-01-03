@@ -18,9 +18,11 @@ WORKDIR_CONTAINER=/root/workspace
 
 docker run -it --rm \
   --dns 8.8.8.8 \
+  --memory="2gb" \
+  --cpus="8" \
   -w $WORKDIR_CONTAINER \
   -v $WORKDIR_HOST:$WORKDIR_CONTAINER \
   -v $LUA_CONFIG_HOST:$LUA_CONFIG_CONTAINER \
   -v $DATA_CORE_HOST:$DATA_CORE_CONTAINER \
   -v $DATA_LAZY_HOST:$DATA_LAZY_CONTAINER \
-  $IMAGE /sh -uelic 'nvim'
+  $IMAGE sh -ueic 'nvim'
